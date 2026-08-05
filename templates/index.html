@@ -10,6 +10,10 @@
 
     <form method="POST" action="{{ url_for('nova_aposta') }}" id="form-arbitragem">
         <input type="hidden" name="estrategia" value="Sistema de Arbitragem">
+        
+        <!-- Campos ocultos para capturar o Lucro e o Retorno calculados pelo JS -->
+        <input type="hidden" name="lucro_input" id="lucro_input" value="0">
+        <input type="hidden" name="retorno_input" id="retorno_input" value="0">
 
         <div style="background: #111e38; padding: 18px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #1e3a5f;">
             <label style="font-weight: bold; display: block; margin-bottom: 8px; color: #e2e8f0;">Nome do Evento / Jogo:</label>
@@ -215,6 +219,8 @@
             document.getElementById('res-roi').innerText = `0.00%`;
             document.getElementById('res-investimento').innerText = `R$ 0,00`;
             document.getElementById('res-retorno').innerText = `R$ 0,00`;
+            document.getElementById('lucro_input').value = 0;
+            document.getElementById('retorno_input').value = 0;
 
             const distContainer = document.getElementById('distribuicao-lista');
             distContainer.innerHTML = '';
@@ -257,10 +263,14 @@
         const lucroGarantido = retornoAlvo - investimentoTotal;
         const roi = investimentoTotal > 0 ? (lucroGarantido / investimentoTotal) * 100 : 0;
 
+        // Atualiza os resultados visuais e os inputs ocultos enviados no form
         document.getElementById('res-lucro').innerText = `R$ ${lucroGarantido.toFixed(2)}`;
         document.getElementById('res-roi').innerText = `${roi.toFixed(2)}%`;
         document.getElementById('res-investimento').innerText = `R$ ${investimentoTotal.toFixed(2)}`;
         document.getElementById('res-retorno').innerText = `R$ ${retornoAlvo.toFixed(2)}`;
+        
+        document.getElementById('lucro_input').value = lucroGarantido.toFixed(2);
+        document.getElementById('retorno_input').value = retornoAlvo.toFixed(2);
 
         const distContainer = document.getElementById('distribuicao-lista');
         distContainer.innerHTML = '';
