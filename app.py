@@ -10,13 +10,12 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 
-# Modelo do Banco de Dados
+# Modelo do Banco de Dados atualizado para a Arbitragem
 class Aposta(db.Model):
   id = db.Column(db.Integer, primary_key=True)
-  titulo = db.Column(db.String(100), nullable=False)
-  casa = db.Column(db.String(50), nullable=False)
-  valor = db.Column(db.Float, nullable=False)
-  odd = db.Column(db.Float, nullable=False)
+  evento = db.Column(db.String(100), nullable=False)
+  estrategia = db.Column(db.String(50), nullable=False)
+  investimento = db.Column(db.Float, nullable=False)
   status = db.Column(db.String(20), default="Pendente")
 
 
@@ -24,7 +23,7 @@ with app.app_context():
   db.create_all()
 
 
-# Rota Principal com todas as variáveis do painel calculadas
+# Rota Principal
 @app.route("/")
 def index():
   apostas = Aposta.query.all()
@@ -34,13 +33,8 @@ def index():
   roi_acumulado = 0.0
 
   for a in apostas:
-    if a.valor and a.odd:
-      investimento_total += a.valor
-      lucro = (a.valor * a.odd) - a.valor
-      lucro_total += lucro
-
-  if investimento_total > 0:
-    roi_acumulado = (lucro_total / investimento_total) * 100
+    if a.investimento:
+      investimento_total += a.investimento
 
   return render_template(
       "index.html",
@@ -51,37 +45,33 @@ def index():
   )
 
 
-# Rota para Adicionar Nova Aposta
-@app.route("/nova", methods=["GET", "POST"])
+# Rota para Adicionar Nova Aposta via Calculadora
+@app.route("/nova", methods=["POST"])
 def nova_aposta():
-  if request.method == "POST":
-    titulo = request.form["titulo"]
-    casa = request.form["casa"]
-    valor = float(request.form["valor"])
-    odd = float(request.form["odd"])
+  evento = request.form.get("evento", "Evento Desconhecido")
+  estrategia = request.form.get("estrategia", "Sistema de Arbitragem")
 
-    nova = Aposta(titulo=titulo, casa=casa, valor=valor, odd=odd)
-    db.session.add(nova)
-    db.session.commit()
-    return redirect(url_for("index"))
+  # Captura a lista de valores enviados pelos inputs dinâmicos
+  valores = request.form.getlist("valor")
 
-  return render_template("nova_aposta.html")
+  investimento_total = 0.0
+  for v in valores:
+    try:
+      val_limpo = float(v.replace(",", "."))
+      investimento_total += val_limpo
+    except ValueError:
+      pass
 
+  nova = Aposta(
+      evento=evento,
+      estrategia=estrategia,
+      investimento=investimento_total,
+      status="Pendente",
+  )
+  db.session.add(nova)
+  db.session.commit()
 
-# Rota para Editar Aposta
-@app.route("/editar/<int:id>", methods=["GET", "POST"])
-def editar_aposta(id):
-  aposta = Aposta.query.get_or_404(id)
-  if request.method == "POST":
-    aposta.titulo = request.form["titulo"]
-    aposta.casa = request.form["casa"]
-    aposta.valor = float(request.form["valor"])
-    aposta.odd = float(request.form["odd"])
-    aposta.status = request.form["status"]
-    db.session.commit()
-    return redirect(url_for("index"))
-
-  return render_template("editar_aposta.html", aposta=aposta)
+  return redirect(url_for("index"))
 
 
 # Rota para Excluir Aposta
@@ -91,12 +81,6 @@ def excluir_aposta(id):
   db.session.delete(aposta)
   db.session.commit()
   return redirect(url_for("index"))
-
-
-# Rota para Painel de Bônus
-@app.route("/bonus")
-def painel_bonus():
-  return render_template("painel_bonus.html")
 
 
 if __name__ == "__main__":
