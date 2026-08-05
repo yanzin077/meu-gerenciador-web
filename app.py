@@ -24,24 +24,30 @@ with app.app_context():
   db.create_all()
 
 
-# Rota Principal com o cálculo de todas as variáveis do painel
+# Rota Principal com todas as variáveis do painel calculadas
 @app.route("/")
 def index():
   apostas = Aposta.query.all()
 
   lucro_total = 0.0
   investimento_total = 0.0
+  roi_acumulado = 0.0
 
   for a in apostas:
     if a.valor and a.odd:
       investimento_total += a.valor
-      lucro_total += (a.valor * a.odd) - a.valor
+      lucro = (a.valor * a.odd) - a.valor
+      lucro_total += lucro
+
+  if investimento_total > 0:
+    roi_acumulado = (lucro_total / investimento_total) * 100
 
   return render_template(
       "index.html",
       apostas=apostas,
       lucro_total=lucro_total,
       investimento_total=investimento_total,
+      roi_acumulado=roi_acumulado,
   )
 
 
