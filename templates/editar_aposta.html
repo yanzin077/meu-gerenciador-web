@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Editar Aposta #{{ op.id }} - {{ op.evento }}</h2>
+
+<form method="POST">
+    <div class="form-group">
+        <label>Nome do Evento:</label>
+        <input type="text" name="evento" value="{{ op.evento }}" required>
+    </div>
+
+    <div class="form-group">
+        <label>Status:</label>
+        <select name="status">
+            <option value="Pendente" {% if op.status == 'Pendente' %}selected{% endif %}>Pendente</option>
+            <option value="Concluída (Normal)" {% if op.status == 'Concluída (Normal)' %}selected{% endif %}>Concluída (Normal)</option>
+            <option value="Concluída (Com Lucro Extra)" {% if 'Lucro Extra' in op.status %}selected{% endif %}>Concluída (Com Lucro Extra)</option>
+            <option value="Concluída (Com Perda)" {% if 'Perda' in op.status %}selected{% endif %}>Concluída (Com Perda)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Resultado Final Real (R$):</label>
+        <input type="number" step="0.01" name="lucro_real" value="{{ op.lucro_real }}" required>
+    </div>
+
+    <div class="form-group">
+        <label>Observação:</label>
+        <input type="text" name="observacao" value="{{ op.observacao }}">
+    </div>
+
+    <button type="submit" class="btn">Atualizar Dados</button>
+</form>
+{% endblock %}

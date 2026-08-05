@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto; color: #f8fafc;">
+    
+    <div style="text-align: center; margin-bottom: 25px;">
+        <h2 style="color: #d4af37; font-size: 2rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px;">PAINEL DE BÔNUS</h2>
+        <p style="color: #c5a059; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;">Gestão de Rollovers & Freebets</p>
+    </div>
+
+    <!-- Formulário para Registrar Novo Bônus -->
+    <div style="background: #111e38; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #1e3a5f;">
+        <h3 style="color: #ffffff; margin-bottom: 15px; font-size: 1.1rem;">Cadastrar Novo Bônus</h3>
+        <form method="POST" action="{{ url_for('painel_bonus') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div>
+                <label style="font-size: 0.85rem; color: #94a3b8; display: block; margin-bottom: 5px;">Casa de Aposta:</label>
+                <input type="text" name="casa" placeholder="Ex: Bet365" required style="width: 100%; padding: 8px 12px; border-radius: 5px; background: #0b1326; color: white; border: 1px solid #2a4365;">
+            </div>
+            <div>
+                <label style="font-size: 0.85rem; color: #94a3b8; display: block; margin-bottom: 5px;">Valor do Bônus (R$):</label>
+                <input type="number" step="0.01" name="valor_bonus" placeholder="100.00" required style="width: 100%; padding: 8px 12px; border-radius: 5px; background: #0b1326; color: white; border: 1px solid #2a4365;">
+            </div>
+            <div>
+                <label style="font-size: 0.85rem; color: #94a3b8; display: block; margin-bottom: 5px;">Rollover / Regras:</label>
+                <input type="text" name="rollover" placeholder="Ex: 5x Odd 1.80" style="width: 100%; padding: 8px 12px; border-radius: 5px; background: #0b1326; color: white; border: 1px solid #2a4365;">
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+                <button type="submit" style="width: 100%; background: #d4af37; color: #0b1326; font-weight: bold; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+                    Adicionar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabela de Bônus Registrados -->
+    <h3 style="font-size: 1.2rem; margin-bottom: 15px; color: #ffffff;">Seus Bônus Ativos</h3>
+
+    {% if not bonus_list %}
+        <p style="color: #94a3b8;">Nenhum bônus cadastrado no momento.</p>
+    {% else %}
+        <div style="background: #111e38; border-radius: 8px; border: 1px solid #1e3a5f; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="background: #0b1326; color: #d4af37; border-bottom: 1px solid #1e3a5f;">
+                        <th style="padding: 12px 15px;">Casa</th>
+                        <th style="padding: 12px 15px;">Valor do Bônus</th>
+                        <th style="padding: 12px 15px;">Rollover</th>
+                        <th style="padding: 12px 15px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in bonus_list %}
+                    <tr style="border-bottom: 1px solid #1e3a5f;">
+                        <td style="padding: 12px 15px; color: #ffffff; font-weight: bold;">{{ item.casa }}</td>
+                        <td style="padding: 12px 15px; color: #4ade80;">R$ {{ "%.2f"|format(item.valor_bonus) }}</td>
+                        <td style="padding: 12px 15px; color: #94a3b8;">{{ item.rollover }}</td>
+                        <td style="padding: 12px 15px; color: #38bdf8;">{{ item.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

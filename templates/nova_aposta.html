@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 1100px; margin: 0 auto; color: #f8fafc;">
+    
+    <div style="text-align: center; margin-bottom: 25px;">
+        <h2 style="color: #d4af37; font-size: 2rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px;">SAFEBET 083</h2>
+        <p style="color: #c5a059; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;">Sistemas de Arbitragem Profissional</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('nova_aposta') }}" id="form-arbitragem">
+        <input type="hidden" name="estrategia" value="Sistema de Arbitragem">
+
+        <div style="background: #111e38; padding: 18px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #1e3a5f;">
+            <label style="font-weight: bold; display: block; margin-bottom: 8px; color: #e2e8f0;">Nome do Evento / Jogo:</label>
+            <input type="text" name="evento" placeholder="Ex: Flamengo x Palmeiras" required style="width: 100%; padding: 10px; border-radius: 5px; background: #0b1326; color: white; border: 1px solid #2a4365;">
+        </div>
+
+        <div style="background: #111e38; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #1e3a5f; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong style="font-size: 1.05rem; color: #e2e8f0;">Número de Resultados / Casas:</strong>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn-num-casas" onclick="mudarNumCasas(2)" id="btn-casa-2" style="padding: 8px 16px; border-radius: 5px; border: none; background: #d4af37; color: #0b1326; cursor: pointer; font-weight: bold;">2</button>
+                <button type="button" class="btn-num-casas" onclick="mudarNumCasas(3)" id="btn-casa-3" style="padding: 8px 16px; border-radius: 5px; border: 1px solid #2a4365; background: #0b1326; color: white; cursor: pointer; font-weight: bold;">3</button>
+                <button type="button" class="btn-num-casas" onclick="mudarNumCasas(4)" id="btn-casa-4" style="padding: 8px 16px; border-radius: 5px; border: 1px solid #2a4365; background: #0b1326; color: white; cursor: pointer; font-weight: bold;">4</button>
+                <button type="button" class="btn-num-casas" onclick="mudarNumCasas(5)" id="btn-casa-5" style="padding: 8px 16px; border-radius: 5px; border: 1px solid #2a4365; background: #0b1326; color: white; cursor: pointer; font-weight: bold;">5</button>
+            </div>
+        </div>
+
+        <div id="cards-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px;"></div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 25px;">
+            <div style="background: #111e38; padding: 20px; border-radius: 8px; border: 1px solid #1e3a5f;">
+                <h3 style="color: #d4af37; margin-top: 0; margin-bottom: 15px;">Resultados</h3>
+                <div style="display: flex; justify-content: space-between; padding: 12px; background: #0b1326; border-radius: 5px; margin-bottom: 10px; border: 1px solid #1e293b;">
+                    <span>Lucro garantido:</span>
+                    <strong id="res-lucro" style="color: #4ade80;">R$ 0,00</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 12px; background: #0b1326; border-radius: 5px; margin-bottom: 10px; border: 1px solid #1e293b;">
+                    <span>ROI:</span>
+                    <strong id="res-roi" style="color: #38bdf8;">0.00%</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 12px; background: #0b1326; border-radius: 5px; border: 1px solid #1e293b;">
+                    <span>Investimento total:</span>
+                    <strong id="res-investimento">R$ 0,00</strong>
+                </div>
+            </div>
+
+            <div style="background: #111e38; padding: 20px; border-radius: 8px; border: 1px solid #1e3a5f;">
+                <h3 style="color: #d4af37; margin-top: 0; margin-bottom: 15px;">Distribuição das apostas</h3>
+                <div id="distribuicao-lista" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;"></div>
+                <hr style="border-color: #1e3a5f; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                    <span>Retorno garantido:</span>
+                    <span id="res-retorno" style="color: #d4af37;">R$ 0,00</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Observações:</label>
+            <input type="text" name="observacao" placeholder="Opcional" style="width: 100%; padding: 10px; border-radius: 5px; background: #111e38; color: white; border: 1px solid #1e3a5f;">
+        </div>
+
+        <button type="submit" style="background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: #0b1326; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-weight: 800; width: 100%; font-size: 1.1rem; text-transform: uppercase;">
+            Salvar Aposta no Histórico
+        </button>
+    </form>
+</div>
+
+<script>
+    let numCasasAtuais = 2;
+    let casaFixa = 0;
+
+    let dadosCasas = [
+        { nome: 'Casa 1', odd: 0, aumento: 0, tipo: 'Back', valor: 0, temComissao: false, valComissao: 5, freebet: false },
+        { nome: 'Casa 2', odd: 0, aumento: 0, tipo: 'Back', valor: 0, temComissao: false, valComissao: 5, freebet: false },
+        { nome: 'Casa 3', odd: 0, aumento: 0, tipo: 'Back', valor: 0, temComissao: false, valComissao: 5, freebet: false },
+        { nome: 'Casa 4', odd: 0, aumento: 0, tipo: 'Back', valor: 0, temComissao: false, valComissao: 5, freebet: false },
+        { nome: 'Casa 5', odd: 0, aumento: 0, tipo: 'Back', valor: 0, temComissao: false, valComissao: 5, freebet: false }
+    ];
+
+    function mudarNumCasas(num) {
+        numCasasAtuais = num;
+        document.querySelectorAll('.btn-num-casas').forEach(btn => {
+            btn.style.background = '#0b1326';
+            btn.style.color = 'white';
+            btn.style.border = '1px solid #2a4365';
+        });
+        const btnAtivo = document.getElementById(`btn-casa-${num}`);
+        if(btnAtivo) {
+            btnAtivo.style.background = '#d4af37';
+            btnAtivo.style.color = '#0b1326';
+            btnAtivo.style.border = 'none';
+        }
+
+        if (casaFixa >= numCasasAtuais) casaFixa = 0;
+        renderizarCards();
+        calcularArbitragem();
+    }
+
+    function renderizarCards() {
+        const container = document.getElementById('cards-container');
+        container.innerHTML = '';
+
+        for (let i = 0; i < numCasasAtuais; i++) {
+            const c = dadosCasas[i];
+            const oddFinal = (c.odd * (1 + (c.aumento / 100))).toFixed(2);
+            const isFixa = (casaFixa === i);
+            const isLay = c.tipo === 'Lay';
+
+            const card = document.createElement('div');
+            card.style = "background: #111e38; padding: 15px; border-radius: 8px; border: 1px solid #1e3a5f; display: flex; flex-direction: column; gap: 10px;";
+
+            card.innerHTML = `
+                <div style="text-align: center; border-bottom: 1px solid #1e3a5f; padding-bottom: 8px;">
+                    <input type="text" name="casa" value="${c.nome}" onchange="dadosCasas[${i}].nome = this.value; calcularArbitragem();" required style="background: transparent; border: none; color: #d4af37; font-weight: bold; text-align: center; width: 100%; font-size: 1rem;">
+                </div>
+
+                <div>
+                    <label style="font-size: 0.8rem; color: #94a3b8;">Odd:</label>
+                    <input type="number" step="0.01" name="odd" placeholder="0.00" value="${c.odd > 0 ? c.odd : ''}" oninput="dadosCasas[${i}].odd = parseFloat(this.value)||0; calcularArbitragem();" required style="width: 100%; padding: 8px; border-radius: 5px; background: #0b1326; color: white; border: 1px solid #2a4365;">
+                    <div style="font-size: 0.75rem; color: #c5a059; margin-top: 3px;">Odd Final: <span id="odd-final-${i}">${oddFinal}</span></div>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.8rem; color: #94a3b8;">Tipo:</label>
+                    <select onchange="dadosCasas[${i}].tipo = this.value; renderizarCards(); calcularArbitragem();" style="width: 100%; padding: 8px; border-radius: 5px; background: #0b1326; color: white; border: 1px solid #2a4365;">
+                        <option value="Back" ${c.tipo === 'Back' ? 'selected' : ''}>Back</option>
+                        <option value="Lay" ${c.tipo === 'Lay' ? 'selected' : ''}>Lay</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.8rem; color: #94a3b8;">Aumento (%):</label>
+                    <input type="number" step="1" value="${c.aumento}" oninput="dadosCasas[${i}].aumento = parseFloat(this.value)||0; calcularArbitragem();" style="width: 100%; padding: 8px; border-radius: 5px; background: #0b1326; color: white; border: 1px solid #2a4365;">
+                </div>
+
+                <div>
+                    <label style="font-size: 0.8rem; color: #94a3b8;">Valor R$:</label>
+                    <input type="number" step="0.01" id="input-valor-${i}" name="valor" placeholder="0.00" value="${c.valor > 0 ? c.valor.toFixed(2) : ''}" oninput="dadosCasas[${i}].valor = parseFloat(this.value)||0; fixarCasa(${i});" required style="width: 100%; padding: 8px; border-radius: 5px; background: #0b1326; color: white; border: 1px solid #2a4365;">
+                </div>
+
+                <div id="box-stake-lay-${i}" style="display: ${isLay ? 'block' : 'none'};">
+                    <div style="display: flex; align-items: center; background: #0b1326; border: 1px solid #2a4365; border-radius: 5px; padding: 6px 10px; font-size: 0.85rem;">
+                        <span style="color: #94a3b8; font-size: 0.8rem; margin-right: 10px;">Stake:</span>
+                        <span id="label-stake-lay-${i}" style="font-weight: bold; color: #d4af37;">0.00</span>
+                    </div>
+                </div>
+
+                <div style="background: #0b1326; padding: 10px; border-radius: 5px; border: 1px solid #1e3a5f; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem;">
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" onchange="toggleComissao(${i}, this.checked)" ${c.temComissao ? 'checked' : ''} style="accent-color: #d4af37;"> 
+                            <span>Comissão</span>
+                        </label>
+                        <div id="box-comissao-${i}" style="display: ${c.temComissao ? 'flex' : 'none'}; align-items: center; gap: 5px; margin-left: 24px;">
+                            <input type="number" step="0.1" value="${c.valComissao}" oninput="dadosCasas[${i}].valComissao = parseFloat(this.value)||0; calcularArbitragem();" style="width: 65px; padding: 4px 6px; border-radius: 4px; background: #111e38; color: white; border: 1px solid #2a4365; font-size: 0.8rem;">
+                            <span style="color: #94a3b8;">%</span>
+                        </div>
+                    </div>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" name="eh_freebet" value="1" onchange="dadosCasas[${i}].freebet = this.checked; calcularArbitragem();" ${c.freebet ? 'checked' : ''} style="accent-color: #38bdf8;"> 
+                        <span>Freebet</span>
+                    </label>
+                </div>
+
+                <button type="button" onclick="fixarCasa(${i})" id="btn-fixar-${i}" style="width: 100%; padding: 8px; border-radius: 5px; border: none; background: ${isFixa ? '#2563eb' : '#1e293b'}; color: white; font-weight: bold; cursor: pointer; margin-top: 5px;">
+                    ${isFixa ? 'Stake Fixada' : 'Fixar Stake'}
+                </button>
+            `;
+
+            container.appendChild(card);
+        }
+    }
+
+    function toggleComissao(index, checked) {
+        dadosCasas[index].temComissao = checked;
+        const box = document.getElementById(`box-comissao-${index}`);
+        if (box) box.style.display = checked ? 'flex' : 'none';
+        calcularArbitragem();
+    }
+
+    function fixarCasa(index) {
+        casaFixa = index;
+        for (let i = 0; i < numCasasAtuais; i++) {
+            const btn = document.getElementById(`btn-fixar-${i}`);
+            if (btn) {
+                btn.style.background = (i === casaFixa) ? '#2563eb' : '#1e293b';
+                btn.innerText = (i === casaFixa) ? 'Stake Fixada' : 'Fixar Stake';
+            }
+        }
+        calcularArbitragem();
+    }
+
+    function calcularArbitragem() {
+        let oddsEfetivas = [];
+        let temOddsInvalidas = false;
+        
+        for (let i = 0; i < numCasasAtuais; i++) {
+            const c = dadosCasas[i];
+            let oddEf = c.odd * (1 + (c.aumento / 100));
+            if (c.temComissao && c.valComissao > 0) {
+                oddEf = 1 + (oddEf - 1) * ((100 - c.valComissao) / 100);
+            }
+            if (oddEf <= 0) temOddsInvalidas = true;
+            oddsEfetivas.push(oddEf);
+
+            const spanOddFinal = document.getElementById(`odd-final-${i}`);
+            if (spanOddFinal) spanOddFinal.innerText = oddEf > 0 ? oddEf.toFixed(2) : '0.00';
+        }
+
+        const stakeBase = dadosCasas[casaFixa].valor || 0;
+        const oddBase = oddsEfetivas[casaFixa];
+
+        if (temOddsInvalidas || stakeBase <= 0 || oddBase <= 0) {
+            document.getElementById('res-lucro').innerText = `R$ 0,00`;
+            document.getElementById('res-roi').innerText = `0.00%`;
+            document.getElementById('res-investimento').innerText = `R$ 0,00`;
+            document.getElementById('res-retorno').innerText = `R$ 0,00`;
+
+            const distContainer = document.getElementById('distribuicao-lista');
+            distContainer.innerHTML = '';
+            for (let i = 0; i < numCasasAtuais; i++) {
+                const c = dadosCasas[i];
+                if (i !== casaFixa) {
+                    const inputValor = document.getElementById(`input-valor-${i}`);
+                    if (inputValor && c.valor === 0) inputValor.value = '';
+                }
+                const labelStakeLay = document.getElementById(`label-stake-lay-${i}`);
+                if (labelStakeLay) labelStakeLay.innerText = '0.00';
+
+                const itemDist = document.createElement('div');
+                itemDist.style = "display: flex; justify-content: space-between; font-size: 0.9rem; background: #0b1326; padding: 8px 10px; border-radius: 5px; border: 1px solid #1e293b;";
+                itemDist.innerHTML = `<span><strong>${c.nome}:</strong> R$ 0.00 (0.00%)</span><span style="color: #4ade80;">Lucro: R$ 0.00</span>`;
+                distContainer.appendChild(itemDist);
+            }
+            return;
+        }
+
+        let retornoAlvo = (dadosCasas[casaFixa].tipo === 'Lay') ? (stakeBase / (oddsEfetivas[casaFixa] - 1)) * oddsEfetivas[casaFixa] : stakeBase * oddBase;
+        let investimentoTotal = 0;
+
+        for (let i = 0; i < numCasasAtuais; i++) {
+            const c = dadosCasas[i];
+            if (i !== casaFixa) {
+                c.valor = (c.tipo === 'Lay') ? (retornoAlvo / oddsEfetivas[i]) * (oddsEfetivas[i] - 1) : retornoAlvo / oddsEfetivas[i];
+                const inputValor = document.getElementById(`input-valor-${i}`);
+                if (inputValor) inputValor.value = c.valor.toFixed(2);
+            }
+
+            if (c.tipo === 'Lay') {
+                const labelStakeLay = document.getElementById(`label-stake-lay-${i}`);
+                if (labelStakeLay) labelStakeLay.innerText = (oddsEfetivas[i] > 1 ? (c.valor / (oddsEfetivas[i] - 1)) : 0).toFixed(2);
+            }
+
+            if (!c.freebet) investimentoTotal += c.valor;
+        }
+
+        const lucroGarantido = retornoAlvo - investimentoTotal;
+        const roi = investimentoTotal > 0 ? (lucroGarantido / investimentoTotal) * 100 : 0;
+
+        document.getElementById('res-lucro').innerText = `R$ ${lucroGarantido.toFixed(2)}`;
+        document.getElementById('res-roi').innerText = `${roi.toFixed(2)}%`;
+        document.getElementById('res-investimento').innerText = `R$ ${investimentoTotal.toFixed(2)}`;
+        document.getElementById('res-retorno').innerText = `R$ ${retornoAlvo.toFixed(2)}`;
+
+        const distContainer = document.getElementById('distribuicao-lista');
+        distContainer.innerHTML = '';
+
+        for (let i = 0; i < numCasasAtuais; i++) {
+            const c = dadosCasas[i];
+            const porcentagem = investimentoTotal > 0 ? ((c.valor / investimentoTotal) * 100).toFixed(2) : '0.00';
+            const itemDist = document.createElement('div');
+            itemDist.style = "display: flex; justify-content: space-between; font-size: 0.9rem; background: #0b1326; padding: 8px 10px; border-radius: 5px; border: 1px solid #1e293b;";
+            itemDist.innerHTML = `<span><strong>${c.nome} (${c.tipo}):</strong> R$ ${c.valor.toFixed(2)} (${porcentagem}%)</span><span style="color: #4ade80;">Lucro: R$ ${lucroGarantido.toFixed(2)}</span>`;
+            distContainer.appendChild(itemDist);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => mudarNumCasas(2));
+</script>
+{% endblock %}
