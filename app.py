@@ -24,11 +24,20 @@ with app.app_context():
   db.create_all()
 
 
-# Rota Principal (Página Inicial)
+# Rota Principal (Página Inicial com cálculo do lucro_total)
 @app.route("/")
 def index():
   apostas = Aposta.query.all()
-  return render_template("index.html", apostas=apostas)
+
+  # Calcula o lucro total de forma segura para evitar erros
+  lucro_total = 0.0
+  for a in apostas:
+    if a.valor and a.odd:
+      lucro_total += (a.valor * a.odd) - a.valor
+
+  return render_template(
+      "index.html", apostas=apostas, lucro_total=lucro_total
+  )
 
 
 # Rota para Adicionar Nova Aposta
