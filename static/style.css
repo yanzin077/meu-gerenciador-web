@@ -1,0 +1,119 @@
+:root {
+  --bg: #121824;
+  --card-bg: #1e293b;
+  --text: #f8fafc;
+  --accent: #3b82f6;
+  --green: #22c55e;
+  --red: #ef4444;
+  --border: #334155;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: var(--card-bg);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+header h1 { margin: 0; font-size: 1.25rem; color: var(--accent); }
+
+nav a {
+  color: var(--text);
+  text-decoration: none;
+  margin-left: 1rem;
+  font-weight: 500;
+}
+
+nav a:hover { color: var(--accent); }
+
+.container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+
+.cards-resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: var(--card-bg);
+  padding: 1.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.card h3 { margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #94a3b8; }
+.card .val { font-size: 1.5rem; font-weight: bold; }
+
+.btn {
+  background: var(--accent);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-danger { background: var(--red); }
+.btn-sm { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+
+.aposta-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.aposta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.badge {
+  background: #334155;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.entradas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.5rem;
+  background: #0f172a;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+}
+
+form .form-group { margin-bottom: 1rem; }
+form label { display: block; margin-bottom: 0.3rem; }
+form input, form select {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #0f172a;
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.positivo { color: var(--green); }
+.negativo { color: var(--red); }
