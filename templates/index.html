@@ -5,25 +5,7 @@
     
     <div style="text-align: center; margin-bottom: 25px;">
         <h2 style="color: #d4af37; font-size: 2rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px;">SAFEBET 083</h2>
-        <p style="color: #c5a059; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;">Sistemas de Arbitragem Profissional</p>
-    </div>
-
-    <!-- Cards Informativos -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
-        <div style="background: #111e38; padding: 20px; border-radius: 8px; border: 1px solid #1e3a5f; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-            <span style="font-size: 0.75rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Lucro Líquido Acumulado</span>
-            <div style="font-size: 1.8rem; font-weight: bold; color: #4ade80; margin-top: 8px;">R$ {{ "%.2f"|format(lucro_total) }}</div>
-        </div>
-
-        <div style="background: #111e38; padding: 20px; border-radius: 8px; border: 1px solid #1e3a5f; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-            <span style="font-size: 0.75rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Investimento Total</span>
-            <div style="font-size: 1.8rem; font-weight: bold; color: #ffffff; margin-top: 8px;">R$ {{ "%.2f"|format(investimento_total) }}</div>
-        </div>
-
-        <div style="background: #111e38; padding: 20px; border-radius: 8px; border: 1px solid #1e3a5f; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-            <span style="font-size: 0.75rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">ROI Acumulado</span>
-            <div style="font-size: 1.8rem; font-weight: bold; color: #38bdf8; margin-top: 8px;">{{ "%.2f"|format(roi_acumulado) }}%</div>
-        </div>
+        <p style="color: #c5a059; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;">Calculadora de Arbitragem Profissional</p>
     </div>
 
     <form method="POST" action="{{ url_for('nova_aposta') }}" id="form-arbitragem">
@@ -76,51 +58,10 @@
             </div>
         </div>
 
-        <div style="margin-bottom: 20px;">
-            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Observações:</label>
-            <input type="text" name="observacao" placeholder="Opcional" style="width: 100%; padding: 10px; border-radius: 5px; background: #111e38; color: white; border: 1px solid #1e3a5f;">
-        </div>
-
         <button type="submit" style="background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: #0b1326; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-weight: 800; width: 100%; font-size: 1.1rem; text-transform: uppercase;">
             Salvar Aposta no Histórico
         </button>
     </form>
-
-    <!-- Tabela do Histórico Logo Abaixo -->
-    <div style="margin-top: 40px;">
-        <h3 style="font-size: 1.3rem; margin-bottom: 15px; color: #ffffff;">Histórico de Apostas Registradas</h3>
-
-        {% if not apostas %}
-            <p style="color: #94a3b8;">Nenhuma aposta cadastrada ainda.</p>
-        {% else %}
-            <div style="background: #111e38; border-radius: 8px; border: 1px solid #1e3a5f; overflow: hidden;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                    <thead>
-                        <tr style="background: #0b1326; color: #d4af37; border-bottom: 1px solid #1e3a5f;">
-                            <th style="padding: 12px 15px;">Evento</th>
-                            <th style="padding: 12px 15px;">Estratégia</th>
-                            <th style="padding: 12px 15px;">Investimento</th>
-                            <th style="padding: 12px 15px;">Status</th>
-                            <th style="padding: 12px 15px; text-align: center;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in apostas %}
-                        <tr style="border-bottom: 1px solid #1e3a5f;">
-                            <td style="padding: 12px 15px; color: #ffffff; font-weight: bold;">{{ item.evento }}</td>
-                            <td style="padding: 12px 15px; color: #94a3b8;">{{ item.estrategia }}</td>
-                            <td style="padding: 12px 15px; color: #ffffff;">R$ {{ "%.2f"|format(item.investimento) }}</td>
-                            <td style="padding: 12px 15px; color: #c5a059;">{{ item.status }}</td>
-                            <td style="padding: 12px 15px; text-align: center;">
-                                <a href="{{ url_for('excluir_aposta', id=item.id) }}" style="color: #ef4444; text-decoration: none; font-weight: bold;">Excluir</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% endif %}
-    </div>
 
 </div>
 
