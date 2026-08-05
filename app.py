@@ -57,23 +57,22 @@ def nova_aposta():
     evento = request.form.get("evento", "Evento Desconhecido")
     estrategia = request.form.get("estrategia", "Sistema de Arbitragem")
 
-    # Tratamento seguro para converter valores decimais com vírgula ou ponto
-    def limpar_float(val):
-      if not val:
+    def converter_para_float(valor_str):
+      if not valor_str:
         return 0.0
       try:
-        return float(str(val).replace(".", "").replace(",", "."))
-      except ValueError:
-        try:
-          return float(str(val).replace(",", "."))
-        except ValueError:
-          return 0.0
+        # Remove pontos de milhar e troca vírgula por ponto
+limpo = str(valor_str).replace(".", "").replace(",", ".")
+        # Se houver múltiplos pontos, trata corretamente
+        return float(valor_str.replace(",", "."))
+      except:
+        return 0.0
 
-    lucro = limpar_float(request.form.get("lucro_input"))
-    retorno = limpar_float(request.form.get("retorno_input"))
+    lucro = float(request.form.get("lucro_input", 0.0) or 0.0)
+    retorno = float(request.form.get("retorno_input", 0.0) or 0.0)
 
     valores = request.form.getlist("valor")
-    investimento_total = sum(limpar_float(v) for v in valores)
+    investimento_total = sum(float(v) for v in valores if v)
 
     nova = Aposta(
         evento=evento,
