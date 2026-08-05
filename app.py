@@ -57,17 +57,6 @@ def nova_aposta():
     evento = request.form.get("evento", "Evento Desconhecido")
     estrategia = request.form.get("estrategia", "Sistema de Arbitragem")
 
-    def converter_para_float(valor_str):
-      if not valor_str:
-        return 0.0
-      try:
-        # Remove pontos de milhar e troca vírgula por ponto
-limpo = str(valor_str).replace(".", "").replace(",", ".")
-        # Se houver múltiplos pontos, trata corretamente
-        return float(valor_str.replace(",", "."))
-      except:
-        return 0.0
-
     lucro = float(request.form.get("lucro_input", 0.0) or 0.0)
     retorno = float(request.form.get("retorno_input", 0.0) or 0.0)
 
