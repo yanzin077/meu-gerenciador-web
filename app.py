@@ -24,19 +24,24 @@ with app.app_context():
   db.create_all()
 
 
-# Rota Principal (Página Inicial com cálculo do lucro_total)
+# Rota Principal com o cálculo de todas as variáveis do painel
 @app.route("/")
 def index():
   apostas = Aposta.query.all()
 
-  # Calcula o lucro total de forma segura para evitar erros
   lucro_total = 0.0
+  investimento_total = 0.0
+
   for a in apostas:
     if a.valor and a.odd:
+      investimento_total += a.valor
       lucro_total += (a.valor * a.odd) - a.valor
 
   return render_template(
-      "index.html", apostas=apostas, lucro_total=lucro_total
+      "index.html",
+      apostas=apostas,
+      lucro_total=lucro_total,
+      investimento_total=investimento_total,
   )
 
 
