@@ -10,7 +10,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 
-# Modelo do Banco de Dados atualizado para a Arbitragem
+# Modelo do Banco de Dados
 class Aposta(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   evento = db.Column(db.String(100), nullable=False)
@@ -23,18 +23,21 @@ with app.app_context():
   db.create_all()
 
 
-# Rota Principal
+# Rota Principal (Calculadora)
 @app.route("/")
 def index():
   apostas = Aposta.query.all()
 
   lucro_total = 0.0
   investimento_total = 0.0
-  roi_acumulado = 0.0
 
   for a in apostas:
     if a.investimento:
       investimento_total += a.investimento
+
+  roi_acumulado = (
+      (lucro_total / investimento_total) * 100 if investimento_total > 0 else 0.0
+  )
 
   return render_template(
       "index.html",
@@ -45,15 +48,19 @@ def index():
   )
 
 
+# Rota do Painel de Bônus
+@app.route("/painel_bonus")
+def painel_bonus():
+  return render_template("painel_bonus.html")
+
+
 # Rota para Adicionar Nova Aposta via Calculadora
 @app.route("/nova", methods=["POST"])
 def nova_aposta():
   evento = request.form.get("evento", "Evento Desconhecido")
   estrategia = request.form.get("estrategia", "Sistema de Arbitragem")
 
-  # Captura a lista de valores enviados pelos inputs dinâmicos
   valores = request.form.getlist("valor")
-
   investimento_total = 0.0
   for v in valores:
     try:
