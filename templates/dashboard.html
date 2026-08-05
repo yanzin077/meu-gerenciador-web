@@ -39,6 +39,7 @@
                         <th style="padding: 12px 15px;">Evento</th>
                         <th style="padding: 12px 15px;">Estratégia</th>
                         <th style="padding: 12px 15px;">Investimento</th>
+                        <th style="padding: 12px 15px;">Lucro</th>
                         <th style="padding: 12px 15px;">Status</th>
                         <th style="padding: 12px 15px; text-align: center;">Ações</th>
                     </tr>
@@ -49,7 +50,8 @@
                         <td style="padding: 12px 15px; color: #ffffff; font-weight: bold;">{{ item.evento }}</td>
                         <td style="padding: 12px 15px; color: #94a3b8;">{{ item.estrategia }}</td>
                         <td style="padding: 12px 15px; color: #ffffff;">R$ {{ "%.2f"|format(item.investimento) }}</td>
-                        <td style="padding: 12px 15px; color: #c5a059;">{{ item.status }}</td>
+                        <td style="padding: 12px 15px; color: #4ade80; font-weight: bold;">R$ {{ "%.2f"|format(item.lucro) }}</td>
+                        <td style="padding: 12px 15px; color: #4ade80; font-weight: bold;">{{ item.status }}</td>
                         <td style="padding: 12px 15px; text-align: center;">
                             <a href="{{ url_for('excluir_aposta', id=item.id) }}" style="color: #ef4444; text-decoration: none; font-weight: bold;">Excluir</a>
                         </td>
