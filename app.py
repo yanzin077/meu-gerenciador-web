@@ -1,71 +1,83 @@
-from flask import Flask, render_template, request, redirect, url_for
+import os
+from flask import Flask, redirect, render_template, request, url_for
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Banco de dados temporário em memória para testes
-historico_apostas = []
-painel_bonus_dados = []
+# Configuração do Banco de Dados SQLite
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///apostas.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db = SQLAlchemy(app)
 
-@app.route('/')
-@app.route('/dashboard')
+
+# Modelo do Banco de Dados
+class Aposta(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  titulo = db.Column(db.String(100), nullable=False)
+  casa = db.Column(db.String(50), nullable=False)
+  valor = db.Column(db.Float, nullable=False)
+  odd = db.Column(db.Float, nullable=False)
+  status = db.Column(db.String(20), default="Pendente")
+
+
+with app.app_context():
+  db.create_all()
+
+
+# Rota Principal (Página Inicial)
+@app.route("/")
 def index():
-    lucro_total = sum(a.get('lucro', 0) for a in historico_apostas)
-    investimento_total = sum(a.get('investimento', 0) for a in historico_apostas)
-    roi_acumulado = (lucro_total / investimento_total * 100) if investimento_total > 0 else 0
-    
-    return render_template(
-        'index.html', 
-        apostas=historico_apostas,
-        lucro_total=lucro_total,
-        investimento_total=investimento_total,
-        roi_acumulado=roi_acumulado
-    )
+  apostas = Aposta.query.all()
+  return render_template("index.html", apostas=apostas)
 
-@app.route('/nova_aposta', methods=['GET', 'POST'])
+
+# Rota para Adicionar Nova Aposta
+@app.route("/nova", methods=["GET", "POST"])
 def nova_aposta():
-    if request.method == 'POST':
-        evento = request.form.get('evento')
-        estrategia = request.form.get('estrategia', 'Arbitragem')
-        observacao = request.form.get('observacao', '')
-        
-        # Recebe as listas de dados enviadas pelo formulário
-        casas = request.form.getlist('casa')
-        odds = request.form.getlist('odd')
-        valores = request.form.getlist('valor')
-        
-        investimento = sum(float(v) for v in valores if v)
-        
-        # Salva o registro
-        historico_apostas.append({
-            'evento': evento,
-            'estrategia': estrategia,
-            'observacao': observacao,
-            'casas': casas,
-            'investimento': investimento,
-            'lucro': 0.0, # Pode ser atualizado ao finalizar a aposta
-            'status': 'Pendente'
-        })
-        return redirect(url_for('index'))
+  if request.method == "POST":
+    titulo = request.form["titulo"]
+    casa = request.form["casa"]
+    valor = float(request.form["valor"])
+    odd = float(request.form["odd"])
 
-    return render_template('nova_aposta.html')
+    nova = Aposta(titulo=titulo, casa=casa, valor=valor, odd=odd)
+    db.session.add(nova)
+    db.session.commit()
+    return redirect(url_for("index"))
 
-@app.route('/painel_bonus', methods=['GET', 'POST'])
+  return render_template("nova_aposta.html")
+
+
+# Rota para Editar Aposta
+@app.route("/editar/<int:id>", methods=["GET", "POST"])
+def editar_aposta(id):
+  aposta = Aposta.query.get_or_404(id)
+  if request.method == "POST":
+    aposta.titulo = request.form["titulo"]
+    aposta.casa = request.form["casa"]
+    aposta.valor = float(request.form["valor"])
+    aposta.odd = float(request.form["odd"])
+    aposta.status = request.form["status"]
+    db.session.commit()
+    return redirect(url_for("index"))
+
+  return render_template("editar_aposta.html", aposta=aposta)
+
+
+# Rota para Excluir Aposta
+@app.route("/excluir/<int:id>")
+def excluir_aposta(id):
+  aposta = Aposta.query.get_or_404(id)
+  db.session.delete(aposta)
+  db.session.commit()
+  return redirect(url_for("index"))
+
+
+# Rota para Painel de Bônus
+@app.route("/bonus")
 def painel_bonus():
-    if request.method == 'POST':
-        casa = request.form.get('casa')
-        valor_bonus = float(request.form.get('valor_bonus', 0))
-        rollover = request.form.get('rollover', '')
-        
-        painel_bonus_dados.append({
-            'casa': casa,
-            'valor_bonus': valor_bonus,
-            'rollover': rollover,
-            'status': 'Em Andamento'
-        })
-        return redirect(url_for('painel_bonus'))
+  return render_template("painel_bonus.html")
 
-    return render_template('painel_bonus.html', bonus_list=painel_bonus_dados)
 
-if __name__ == '__main__':
-    # Define o host para liberar todas as conexões e usa a porta 80 (padrão HTTP)
-    app.run(host='0.0.0.0', port=80, debug=True)
+if __name__ == "__main__":
+  app.run(debug=True)
