@@ -54,29 +54,30 @@ def painel_bonus():
   return render_template("painel_bonus.html")
 
 
-# Rota para Adicionar Nova Aposta via Calculadora
-@app.route("/nova", methods=["POST"])
+# Rota para Adicionar Nova Aposta via Calculadora (Aceita POST e GET)
+@app.route("/nova", methods=["POST", "GET"])
 def nova_aposta():
-  evento = request.form.get("evento", "Evento Desconhecido")
-  estrategia = request.form.get("estrategia", "Sistema de Arbitragem")
+  if request.method == "POST":
+    evento = request.form.get("evento", "Evento Desconhecido")
+    estrategia = request.form.get("estrategia", "Sistema de Arbitragem")
 
-  valores = request.form.getlist("valor")
-  investimento_total = 0.0
-  for v in valores:
-    try:
-      val_limpo = float(v.replace(",", "."))
-      investimento_total += val_limpo
-    except ValueError:
-      pass
+    valores = request.form.getlist("valor")
+    investimento_total = 0.0
+    for v in valores:
+      try:
+        val_limpo = float(v.replace(",", "."))
+        investimento_total += val_limpo
+      except ValueError:
+        pass
 
-  nova = Aposta(
-      evento=evento,
-      estrategia=estrategia,
-      investimento=investimento_total,
-      status="Pendente",
-  )
-  db.session.add(nova)
-  db.session.commit()
+    nova = Aposta(
+        evento=evento,
+        estrategia=estrategia,
+        investimento=investimento_total,
+        status="Pendente",
+    )
+    db.session.add(nova)
+    db.session.commit()
 
   return redirect(url_for("index"))
 
