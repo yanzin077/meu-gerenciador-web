@@ -14,25 +14,25 @@ class Aposta(db.Model):
   evento = db.Column(db.String(100), nullable=False)
   estrategia = db.Column(db.String(50), nullable=False)
   investimento = db.Column(db.Float, nullable=False)
-  status = db.Column(db.String(20), default="Pendente")
+  lucro = db.Column(db.Float, default=0.0)
+  retorno = db.Column(db.Float, default=0.0)
+  status = db.Column(db.String(20), default="Concluído")
 
 
 with app.app_context():
   db.create_all()
 
 
-# Rota Principal agora é a Calculadora
 @app.route("/")
 def index():
   return render_template("index.html")
 
 
-# Rota do Dashboard / Histórico separada
 @app.route("/dashboard")
 def dashboard():
   apostas = Aposta.query.all()
   investimento_total = sum(a.investimento for a in apostas if a.investimento)
-  lucro_total = 0.0
+  lucro_total = sum(a.lucro for a in apostas if a.lucro)
   roi_acumulado = (
       (lucro_total / investimento_total) * 100 if investimento_total > 0 else 0.0
   )
@@ -56,16 +56,32 @@ def nova_aposta():
   if request.method == "POST":
     evento = request.form.get("evento", "Evento Desconhecido")
     estrategia = request.form.get("estrategia", "Sistema de Arbitragem")
+
+    # Tratamento seguro para converter valores decimais com vírgula ou ponto
+    def limpar_float(val):
+      if not val:
+        return 0.0
+      try:
+        return float(str(val).replace(".", "").replace(",", "."))
+      except ValueError:
+        try:
+          return float(str(val).replace(",", "."))
+        except ValueError:
+          return 0.0
+
+    lucro = limpar_float(request.form.get("lucro_input"))
+    retorno = limpar_float(request.form.get("retorno_input"))
+
     valores = request.form.getlist("valor")
-    investimento_total = sum(
-        float(v.replace(",", ".")) for v in valores if v.replace(".", "").isdigit()
-    )
+    investimento_total = sum(limpar_float(v) for v in valores)
 
     nova = Aposta(
         evento=evento,
         estrategia=estrategia,
         investimento=investimento_total,
-        status="Pendente",
+        lucro=lucro,
+        retorno=retorno,
+        status="Concluído",
     )
     db.session.add(nova)
     db.session.commit()
